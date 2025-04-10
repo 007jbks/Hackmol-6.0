@@ -39,7 +39,7 @@ class Pet(Base):
 
 
 class NGO(Base):
-    _tablename_ = "ngo" 
+    __tablename__ = "ngo" 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)  
     ngo_registration_number = Column(String, unique=True, index=True)
