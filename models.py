@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String,ForeignKey , JSON
 from database import Base
 from sqlalchemy.orm import relationship
 import bcrypt
@@ -32,7 +32,7 @@ class Pet(Base):
     health = Column(String,index=True)
     description = Column(String,index=True,nullable=True)
     color_markings = Column(String,index=True)
-
+    traits = Column(JSON)
     seller_id = Column(Integer, ForeignKey("user.id"), index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("user.id"), index=True, nullable=True)  
     potential_owner_id = Column(Integer, ForeignKey("user.id"),index=True)

@@ -13,6 +13,13 @@ from sqlalchemy import case, func
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+#for gemini api
+from gemini_api import image_url_to_base64
+from gemini_api import describe_pet_traits_from_image
+import requests
+import json
+import base64
+
 
 def send_email(to_email, subject, body):
     sender_email = "jon00doe00297@gmail.com"
@@ -67,17 +74,6 @@ class UserCreate(BaseModel):
     password : str
     email : str
 
-# class PetCreate(BaseModel):
-#     name : str
-#     species :str
-#     token: str
-#     age :int
-#     breed :str
-#     gender :str
-#     weight : str
-#     health:str
-#     description:str
-    
 class UserLogin(BaseModel):
     email : str
     password : str
@@ -203,6 +199,8 @@ def sell_pet(
         raise HTTPException(status_code=400,detail="user doesn't exist")
     result = cloudinary.uploader.upload(file.file, folder="pets_images")
     image_url = result.get("secure_url")
+    traits = describe_pet_traits_from_image(image_url)
+
 
     if not image_url:
         raise HTTPException(status_code=500, detail="Failed to get image URL")
@@ -225,7 +223,8 @@ def sell_pet(
                          description=description,
                          breed=breed,
                          color_markings = color_markings,
-                         gender=gender
+                         gender=gender,
+                         traits=traits
                          )
     db.add(pet)
     db.commit()
@@ -273,7 +272,7 @@ def search_pet(
     ).label("match_score")
 
     # Add match_score as a column and use filter instead of having
-    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 1).all()
+    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 2).all()
 
     return {
         "matches": [
@@ -296,76 +295,9 @@ def search_pet(
 
 
 
-# @app.get("/pets")
-# def get_pets(db:db_dependencies):
-#     return db.query(models.Pet).all()
-
-# @app.post("/interest")
-# def search_pet(
-#     species: str = Form(...),
-#     token: str = Form(...),
-#     breed : str = Form(...),
-#     gender : str = Form(...),
-#     weight_range : str = Form(...),
-#     age_range : str = Form(...),
-#     color_markings : str = Form(...),
-#     db: Session = Depends(get_db)
-# ):
-#     username = verify_access_token(token)
-#     poi = db.query(models.User).filter(models.User.username == username).first()
-#     if not poi:
-#         raise HTTPException(status_code=400,detail="user doesn't exist")
-#     try:
-#         min_weight, max_weight = map(int, weight_range.split('-')) 
-#         min_age,max_age = map(int,age_range.split('-'))
-#     except ValueError:
-#         return {"error": "Invalid range format. Use 'min-max'"}
-#     #Matching Algorithm
-#     pets = db.query(models.Pet).filter(
-#         models.Pet.species == species,
-#         models.Pet.breed == breed,
-#         models.Pet.gender == gender,
-#         models.Pet.color_markings.ilike(f"%{color_markings}%"),
-#         models.Pet.weight >= min_weight,
-#         models.Pet.weight <= max_weight,
-#         models.Pet.age >= min_age,
-#         models.Pet.age <= max_age
-#     ).all()
-
-#     return {
-#         "matches": [
-#             {
-#                 "id": pet.id,
-#                 "name": pet.name,
-#                 "species": pet.species,
-#                 "breed": pet.breed,
-#                 "gender": pet.gender,
-#                 "weight": pet.weight,
-#                 "age": pet.age,
-#                 "color_markings": pet.color_markings,
-#                 "health":pet.health,
-#                 "description":pet.description,
-#                 "image_url":pet.image
-#             }
-#             for pet in pets
-#         ]
-#     }
-
-
-# @app.post("/buy")
-# def buy_pet(
-#     id: int = Form(...),
-#     token :str = Form(...),
-#     db: Session = Depends(get_db)
-# ):
-#     pet = db.query(models.Pet).filter(models.Pet.id==id).first()
-#     username = verify_access_token(token)
-#     buyer = db.query(models.User).filter(models.User.username==username).first()
-#     seller = db.query(models.User).filter(models.User.id==pet.seller_id).first()
-#     if seller.id == buyer.id:
-#         raise HTTPException(status_code=400,detail="You cannot buy your own pet")
-#     pet.potential_owner_id = buyer.id
-#     return {"message":"Request Successfully sent"}
+@app.get("/pets")
+def get_pets(db:db_dependencies):
+    return db.query(models.Pet).all()
 
 
 @app.post("/buy")
