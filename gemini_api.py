@@ -82,10 +82,11 @@ Output strictly in this JSON format (no explanation or extra text):
 
 
 def calc_dist(address1, address2):
-    prompt = f"""You are given two addresses: "{address1}" and "{address2}".
-Determine their rough coordinates using your web knowledge or city-level approximation,
-calculate the distance between them, and respond ONLY with True if it's under 100km,
-else respond with False. Do NOT include any explanation or extra text. Output strictly True or False."""
+    prompt = f"""
+    You are given two addresses: "{address1}" and "{address2}". 
+    Estimate the rough coordinates based on city, district, and country. 
+    Then calculate the distance and return only "True" (if less than 100 km) or "False" (if more). No explanation.
+    """
 
     data = {
         "contents": [
@@ -103,21 +104,24 @@ else respond with False. Do NOT include any explanation or extra text. Output st
         "Content-Type": "application/json"
     }
 
-    response = requests.post(URL, headers=headers, data=json.dumps(data))
+    try:
+        response = requests.post(URL, headers=headers, data=json.dumps(data))
 
-    if response.status_code == 200:
-        try:
+        if response.status_code == 200:
             result = response.json()
-            output = result["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
-            if "true" in output:
+            text = result["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
+
+            if "true" or "True" in text:
                 return True
-            elif "false" in output:
+            elif "false" or "False" in text:
                 return False
             else:
-                raise Exception("Unexpected response format:", output)
-        except Exception as e:
-            print("Error:", e)
-            print("Raw response:", json.dumps(result, indent=2))
-    else:
-        print("Request failed with status:", response.status_code)
-        print(response.text)
+                print(f"Unexpected Gemini response: {text}")
+        else:
+            print("Gemini API error:", response.status_code, response.text)
+
+    except Exception as e:
+        print("Error in calc_dist:", str(e))
+
+    
+    return False
