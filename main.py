@@ -118,14 +118,9 @@ def signup(user:UserCreate,db:db_dependencies):
 def get_user(db:db_dependencies):
     return db.query(models.User).all()
 
-# @app.post("/deleteuser")
-# def delete_user(id:int,db:db_dependencies):
-#     user = db.query(models.User).filter(models.User.id==id).first()
-#     if not user:
-#         raise HTTPException(status_code=404,detail = "User not found")
-#     db.delete(user)
-#     db.commit()
-#     return {"message":"User deleted successfully"}
+@app.get("/pets")
+def get_pet(db:db_dependencies):
+    return db.query(models.Pet).all()
 
 @app.post("/login")
 def login(user:UserLogin,db:db_dependencies):
@@ -396,9 +391,6 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
         }
     }
 
-@app.get("/pets")
-def get_pets(db:Session = Depends(get_db)):
-    return db.query(models.Pet).all()
 
 
 ###########################################################################
@@ -413,25 +405,19 @@ def transfer(
     db: Session = Depends(get_db)
 ):
     username = verify_access_token(token)
-
     user = db.query(models.User).filter(models.User.username == username).first()
     if not user:
         raise HTTPException(status_code=404, detail="Invalid user")
-
     pet = db.query(models.Pet).filter(models.Pet.name == pet_name).first()
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
-
     if pet.seller_id != user.id:
         raise HTTPException(status_code=403, detail="You are not the original seller")
-
     new_owner = db.query(models.User).filter(models.User.email == new_owner_email_id).first()
     if not new_owner:
         raise HTTPException(status_code=404, detail="New owner not found")
-
     pet.owner_id = new_owner.id
     db.commit()
-
     return {"message": f"{new_owner.username} now owns {pet.name}"}
 
 @app.post("/update")
