@@ -3,7 +3,7 @@ import json
 import base64
 import re
 
-API_KEY = "AIzaSyDfRLr5B0vgLeMhIf0MmnRnjBd8vJ9W08Y"
+API_KEY = "AIzaSyAJh-FWcmAyN4lt3MD7c7s_aBe0qFXOgoo"
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
 
 # Convert image URL to base64
