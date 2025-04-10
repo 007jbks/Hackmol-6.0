@@ -125,3 +125,6 @@ def calc_dist(address1, address2):
 
     
     return False
+
+
+print(calc_dist("Chennai India","Mumbai India"))
