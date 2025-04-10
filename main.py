@@ -512,12 +512,13 @@ def send_chat(query:str,db:db_dependencies):
 
 @app.post("/update")
 def update_pet_status(
+    background_tasks: BackgroundTasks,
     pet_id: int = Form(...),
     date: str = Form(...),
     file: UploadFile = File(...),
     token: str = Form(...),
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = Depends()
+   
 ):
     username = verify_access_token(token)
     user = db.query(models.User).filter(models.User.username == username).first()
@@ -540,7 +541,7 @@ def update_pet_status(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-    # 💌 Email previous owner
+    #  Email previous owner
     prev_owner = db.query(models.User).filter(models.User.id == pet.seller_id).first()
 
     if prev_owner:
