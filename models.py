@@ -40,6 +40,9 @@ class Pet(Base):
     seller_id = Column(Integer, ForeignKey("user.id"), index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("user.id"), index=True, nullable=True)  
     potential_owner_id = Column(Integer, ForeignKey("user.id"),index=True)
+    update_image_url = Column(String,index=True)
+    update_date = Column(String,index=True)
+    
 
 
 class Abandoned(Base):

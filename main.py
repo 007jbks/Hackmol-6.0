@@ -73,7 +73,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-#models.Base.metadata.drop_all(bind=engine)
+models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
@@ -424,11 +424,7 @@ def transfer(
     db.commit()
     return {"message": f"{new_owner.username} now owns {pet.name}"}
 
-############################ Updating the pet's status ######################
 
-@app.post("/update")
-def update():
-    pass
 
 ################New send mail logic for this######################
 
@@ -507,7 +503,49 @@ def report(
 
 @app.post("/sendChat")
 def send_chat(query:str,db:db_dependencies):
-    
     response = chat(query)
     return {"bot says:":response}
 
+
+############################ Updating the pet's status ######################
+
+@app.post("/update")
+def update_pet_status(
+    pet_id: int = Form(...),
+    date: str = Form(...),
+    file: UploadFile = File(...),
+    token: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    username = verify_access_token(token)
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    # Fetch pet
+    pet = db.query(models.Pet).filter(models.Pet.id == pet_id).first()
+    if not pet:
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+    # ✅ Only allow the current owner to update
+    if pet.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not the current owner")
+
+    # Delete old image if exists
+    if pet.cloudinary_public_id:
+        try:
+            cloudinary.uploader.destroy(pet.cloudinary_public_id)
+        except Exception as e:
+            print(f"⚠️ Failed to delete old image: {e}")
+
+    # Upload new image
+    try:
+        result = cloudinary.uploader.upload(file.file)
+        pet.update_image_url = result["secure_url"]
+        pet.cloudinary_public_id = result["public_id"]
+        pet.update_date = date
+        db.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+    return {"message": "Pet update successful", "image": pet.update_image_url}
