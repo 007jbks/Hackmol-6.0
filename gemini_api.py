@@ -120,4 +120,4 @@ def get_dist(address1,address2):
     else:
         return False
     
-print(get_dist("Mumbai India","Hapur UP India"))
+print(get_dist("Delhi","Delhi"))

@@ -259,6 +259,7 @@ def search_pet(
 
         try:
             if get_dist(user_address, owner.address): 
+                print("Get dist is true.")
                 nearby_matches.append({
                     "id": pet.id,
                     "name": pet.name,
