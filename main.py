@@ -396,6 +396,9 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
         }
     }
 
+app.get("/pets")
+def get_pets(db:Session = Depends(get_db)):
+    return db.query(models.Pet).all()
 
 
 ###########################################################################
@@ -412,13 +415,14 @@ def transfer(
     username = verify_access_token(token)
     user = db.query(models.User).filter(models.User.username==username).first()
     pet = db.query(models.Pet).filter(models.Pet.name == pet_name).first()
+    if not pet:
+        raise HTTPException(status_code=400,detail="This pet doesn't exist")
     if user.id !=pet.seller_id:
         raise HTTPException(status_code=400,detail="You are not the owner of this pet.")
     new_owner = db.query(models.User).filter(models.User.email==new_owner_email_id).first()
     pet.owner_id = new_owner.id
     db.commit()
     return {"message":f"{new_owner.username} now owns {pet.name}"}
-
 
 @app.post("/update")
 def update():
