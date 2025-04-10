@@ -333,7 +333,7 @@ def buy_pet(
     )
     print(f"📧 Sending email to: {seller.email}")
 
-    background_tasks.add_task(send_email, seller.email, subject, body)
+    background_tasks.add_task(send_email, seller.email, subject, body,buyer.email)
 
     return {"message": "Request successfully sent and seller notified."}
 
