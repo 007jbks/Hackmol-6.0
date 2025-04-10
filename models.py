@@ -7,12 +7,13 @@ class User(Base):
     __tablename__ = "user"
     
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)  
+    username = Column(String, index=True)  
     hashed_password = Column(String) 
     ngo_registration_number = Column(Integer, index=True,nullable=True)
     is_ngo = Column(Boolean,index=True,nullable=True)
     email = Column(String,index=True)
     address = Column(String,index=True)
+    contact = Column(String,index=True)
 
     def set_password(self, password: str):
         salt = bcrypt.gensalt()
@@ -41,17 +42,18 @@ class Pet(Base):
     potential_owner_id = Column(Integer, ForeignKey("user.id"),index=True)
 
 
-class NGO(Base):
-    __tablename__ = "ngo" 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, index=True)  
-    
-    hashed_password = Column(String) 
-    email = Column(String, index=True)
+class Abandoned(Base):
+    __tablename__ = "abandoned"
+    species = Column(String,index=True)
+    breed = Column(String,index=True,nullable=True)
+    gender = Column(String,index=True)
+    markings = Column(String,index=True)
+    age = Column(Integer,index=True,nullable=True)
+    features = Column(String,index=True)
+    health = Column(String,index=True)
+    behaviour = Column(String,index=True)
+    location = Column(String,index=True)
+    other = Column(String,index=True,nullable=True)
 
-    def set_password(self, password: str):
-        salt = bcrypt.gensalt()
-        self.hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-    def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+

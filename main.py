@@ -69,7 +69,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-#models.Base.metadata.drop_all(bind=engine)
+models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
@@ -423,3 +423,75 @@ def transfer(
 @app.post("/update")
 def update():
     pass
+
+################New send mail logic for this######################
+
+def send_email(to_email: str, subject: str, body: str):
+    if not to_email or '@' not in to_email:
+        print(f"❌ Skipping invalid email: {to_email}")
+        return
+    
+    try:
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = "yourapp@example.com"
+        msg["To"] = to_email
+
+        with smtplib.SMTP("smtp.yourmailserver.com", 587) as server:
+            server.starttls()
+            server.login("yourapp@example.com", "yourpassword")
+            server.send_message(msg)
+
+        print(f"✅ Email sent to: {to_email}")
+
+    except Exception as e:
+        print(f"🚨 Failed to send email to {to_email}: {str(e)}")
+
+############################### Alerting All NGOs ##########################
+
+@app.post("/report")
+def report(
+    background_tasks: BackgroundTasks,
+    species: str = Form(...),
+    breed: str = Form(...),
+    gender: str = Form(...),
+    markings: str = Form(...),
+    age: int = Form(...),
+    features: str = Form(...),
+    health: str = Form(...),
+    behaviour: str = Form(...),
+    location: str = Form(...),
+    token: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    username = verify_access_token(token)
+    user = db.query(models.User).filter(models.User.username == username).first()
+    
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid token")
+
+    # Get all NGOs or users
+    recipients = db.query(models.User).filter(models.User.is_ngo == True).all()
+    
+
+    for recipient in recipients:
+        subject = f"New Pet Report Alert - {species.title()} ({breed})"
+        body = (
+            f"Hello {recipient.username},\n\n"
+            f"A new pet has been reported:\n"
+            f"Species: {species}\nBreed: {breed}\nGender: {gender}\nAge: {age}\n"
+            f"Health: {health}\nBehaviour: {behaviour}\nMarkings: {markings}\n"
+            f"Features: {features}\nLocation: {location}\n\n"
+            f"Reported by: {user.username} ({user.email})\n"
+            f"Please respond if you can help.\n\n"
+            f"- Pet Alert System"
+        )
+
+        print(f"📧 Sending email to: {recipient.email}")
+        background_tasks.add_task(send_email, recipient.email, subject, body)
+
+    return {"message": "Report submitted and notifications sent."}
+
+
+
+
