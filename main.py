@@ -432,7 +432,7 @@ def update():
 
 ################New send mail logic for this######################
 
-def send_email(to_email: str, subject: str, body: str):
+def send_email(to_email: str, subject: str, body: str,f:str):
     sender_email = "jon00doe00297@gmail.com"
     sender_password = "bdaykyslqvzdulsn"  
     if not to_email or '@' not in to_email:
@@ -442,10 +442,10 @@ def send_email(to_email: str, subject: str, body: str):
     try:
         msg = MIMEText(body)
         msg["Subject"] = subject
-        msg["From"] = "yourapp@example.com"
+        msg["From"] = f
         msg["To"] = to_email
 
-        with smtplib.SMTP("smtp.yourmailserver.com", 587) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(sender_email, sender_password)
             server.send_message(msg)
@@ -496,7 +496,7 @@ def report(
         )
 
         print(f"📧 Sending email to: {recipient.email}")
-        background_tasks.add_task(send_email, recipient.email, subject, body)
+        background_tasks.add_task(send_email, recipient.email, subject, body,user.email)
         print(f"message sent")
 
     return {"message": "Report submitted and notifications sent."}
