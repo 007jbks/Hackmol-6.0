@@ -259,7 +259,7 @@ def search_pet(
 
         # Call Gemini-based distance calculator
         try:
-            if calc_dist(user_address, owner.address):
+            if True:#calc_dist(user_address, owner.address):
                 nearby_matches.append({
                     "id": pet.id,
                     "name": pet.name,
