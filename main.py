@@ -66,7 +66,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-#models.Base.metadata.drop_all(bind=engine)
+models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
@@ -74,6 +74,7 @@ class UserCreate(BaseModel):
     password : str
     email : str
     registration_number : int
+    address : str
 
 class UserLogin(BaseModel):
     email : str
@@ -100,14 +101,13 @@ def signup(user:UserCreate,db:db_dependencies):
     
     if not u:
         new_user = models.User(username=user.username,hashed_password=user.password,email=user.email,ngo_registration_number = user.registration_number,
-        is_ngo=bool(user.registration_number))
+        is_ngo=bool(user.registration_number),address=user.address)
         new_user.set_password(user.password)
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
         access_token = create_access_token(data={"sub": new_user.username})
         return {"access_token": access_token, "token_type": "bearer"}
-    
     else:
         raise HTTPException(status_code=400,detail="Username taken")
 
@@ -140,60 +140,6 @@ def login(user:UserLogin,db:db_dependencies):
 
 ############################# MAIN LOGIC OF APP STARTS HERE ###################
 
-#This is for selling of a pet:
-# @app.post("/sell")
-# def sell_pet(
-#     name: str = Form(...),
-#     species: str = Form(...),
-#     token: str = Form(...),
-#     file: UploadFile = File(...),
-#     breed : str = Form(...),
-#     gender : str = Form(...),
-#     weight : int = Form(...),
-#     age : int = Form(...),
-#     health : str = Form(...),
-#     description : str = Form(...),
-#     color_markings : str = Form(...),
-#     db: Session = Depends(get_db)
-# ):
-#     username = verify_access_token(token)
-#     seller = db.query(models.User).filter(models.User.username == username).first()
-#     if not seller:
-#         raise HTTPException(status_code=400,detail="user doesn't exist")
-#     result = cloudinary.uploader.upload(file.file, folder="pets_images")
-#     image_url = result.get("secure_url")
-#     traits = describe_pet_traits_from_image(image_url)
-
-
-#     if not image_url:
-#         raise HTTPException(status_code=500, detail="Failed to get image URL")
-
-#     existing_pet = db.query(models.Pet).filter(
-#         models.Pet.name == name,
-#         models.Pet.seller_id == seller.id
-#     ).first()
-
-#     if existing_pet:
-#         raise HTTPException(status_code=400, detail="You already listed this pet.")
-
-#     pet = models.Pet(name=name, 
-#                      species=species,
-#                        seller_id=seller.id,
-#                          image=image_url,
-#                          age=age,
-#                          weight=weight,
-#                          health=health,
-#                          description=description,
-#                          breed=breed,
-#                          color_markings = color_markings,
-#                          gender=gender,
-#                          traits=traits
-#                          )
-#     db.add(pet)
-#     db.commit()
-#     db.refresh(pet)
-
-#     return {"message": f"{name} added successfully also {traits}"}
 
 @app.post("/sell")
 def sell_pet(
