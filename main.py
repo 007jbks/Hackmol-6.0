@@ -73,7 +73,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-models.Base.metadata.drop_all(bind=engine)
+#models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
@@ -82,6 +82,7 @@ class UserCreate(BaseModel):
     email : str
     registration_number : Optional[int] = None
     address : str
+    contact :int
 
 class UserLogin(BaseModel):
     email : str
@@ -108,7 +109,7 @@ def signup(user:UserCreate,db:db_dependencies):
     
     if not u:
         new_user = models.User(username=user.username,hashed_password=user.password,email=user.email,ngo_registration_number = user.registration_number,
-        is_ngo=bool(user.registration_number),address=user.address)
+        is_ngo=bool(user.registration_number),address=user.address,contact=user.contact)
         new_user.set_password(user.password)
         db.add(new_user)
         db.commit()
@@ -327,9 +328,9 @@ def buy_pet(
     body = (
         f"Hello {seller.username},\n\n"
         f"{buyer.username} is interested in adopting your pet '{pet.name}' ({pet.species}, {pet.breed}).\n"
-        f"Contact Info: {buyer.email if hasattr(buyer, 'email') else 'N/A'}\n\n"
+        f"Contact Info: email:{buyer.email if hasattr(buyer, 'email') else 'N/A'} and phone:{buyer.contact}\n\n"
         f"Please log in to view their profile and respond to the request.\n\n"
-        f"- Pet Adoption Platform"
+        f"- Pets"
     )
     print(f"📧 Sending email to: {seller.email}")
 
@@ -488,7 +489,7 @@ def report(
             f"Features: {features}\nLocation: {location}\n\n"
             f"Reported by: {user.username} ({user.email})\n"
             f"Please respond if you can help.\n\n"
-            f"- Pet Alert System"
+            f"- PETS Alert System"
         )
 
         print(f"📧 Sending email to: {recipient.email}")
@@ -509,6 +510,9 @@ def send_chat(query:str,db:db_dependencies):
 
 ############################ Updating the pet's status ######################
 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 @app.post("/update")
 def update_pet_status(
     pet_id: int = Form(...),
@@ -522,23 +526,13 @@ def update_pet_status(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    # Fetch pet
     pet = db.query(models.Pet).filter(models.Pet.id == pet_id).first()
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
-    # ✅ Only allow the current owner to update
     if pet.owner_id != user.id:
         raise HTTPException(status_code=403, detail="You are not the current owner")
 
-    # Delete old image if exists
-    if pet.cloudinary_public_id:
-        try:
-            cloudinary.uploader.destroy(pet.cloudinary_public_id)
-        except Exception as e:
-            print(f"⚠️ Failed to delete old image: {e}")
-
-    # Upload new image
     try:
         result = cloudinary.uploader.upload(file.file)
         pet.update_image_url = result["secure_url"]
@@ -548,4 +542,22 @@ def update_pet_status(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-    return {"message": "Pet update successful", "image": pet.update_image_url}
+    # 💌 Email previous owner
+    prev_owner = db.query(models.User).filter(models.User.id == pet.seller_id).first()
+
+    if prev_owner:
+        subject = f"📷 Pet Update Received - {pet.species.title()} ({pet.breed})"
+        body = (
+            f"Hello {prev_owner.username},\n\n"
+            f"The new owner has shared an update about the pet you previously owned.\n"
+            f"📅 Date: {date}\n"
+            f"🖼️ Image Link: {pet.update_image_url}\n\n"
+            f"Regards,\nPet Alert System"
+        )
+        background_tasks = BackgroundTasks()
+        background_tasks.add_task(send_email, prev_owner.email, subject, body,user.email)
+
+    return {
+        "message": "Update submitted and previous owner notified via email.",
+        "image": pet.update_image_url
+    }
