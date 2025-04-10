@@ -3,7 +3,7 @@ import json
 import base64
 import re
 
-API_KEY = "AIzaSyC_WQRG1JmV42vlZfA04gRb3IGj3KgpZqI"
+API_KEY = "AIzaSyDfRLr5B0vgLeMhIf0MmnRnjBd8vJ9W08Y"
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
 
 # Convert image URL to base64
@@ -18,7 +18,7 @@ def image_url_to_base64(image_url):
 def describe_pet_traits_from_image(image_url):
     base64_image = image_url_to_base64(image_url)
 
-    prompt = """Here's a pet's or a user's face image. Based on the following traits, please describe it using ONLY the exact terms provided:
+    prompt = """Here is an image of a pet or person. Based ONLY on visible features, classify the following traits using the EXACT terms provided below. If any feature is unclear, guess the most likely option based on the image quality. Always return a full JSON object.
 
 - Face shape: round, oval, triangular, square, long
 - Eye size: big, small, average
@@ -26,15 +26,15 @@ def describe_pet_traits_from_image(image_url):
 - Ear type: floppy, pointed, hidden, upright
 - Fur: fluffy, smooth, short, long
 
-Return the answer in JSON format like:
-
+Output strictly in this JSON format (no explanation or extra text):
 {
-  "face_shape": "round",
-  "eye_size": "big",
-  "nose_shape": "snub",
-  "ear_type": "floppy",
-  "fur": "fluffy"
+  "face_shape": "...",
+  "eye_size": "...",
+  "nose_shape": "...",
+  "ear_type": "...",
+  "fur": "..."
 }
+
 """
 
     data = {
