@@ -193,6 +193,8 @@ def sell_pet(
 
 
 
+from sqlalchemy import case
+
 @app.post("/interest")
 def search_pet(
     species: str = Form(...),
@@ -215,7 +217,7 @@ def search_pet(
     except ValueError:
         return {"error": "Invalid range format. Use 'min-max'"}
 
-    # Partial matching using match score
+    # Scoring system
     score_expr = (
         case((models.Pet.species == species, 1), else_=0) +
         case((models.Pet.breed == breed, 1), else_=0) +
@@ -227,7 +229,8 @@ def search_pet(
         case((models.Pet.age <= max_age, 1), else_=0)
     ).label("match_score")
 
-    matched_pets = db.query(models.Pet, score_expr).having(score_expr >= 4).all()
+    # Add match_score as a column and use filter instead of having
+    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 4).all()
 
     return {
         "matches": [
@@ -244,9 +247,10 @@ def search_pet(
                 "description": pet.description,
                 "image_url": pet.image
             }
-            for pet, _ in matched_pets
+            for pet, score in pets_with_scores
         ]
     }
+
 
 
 # @app.get("/pets")
