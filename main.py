@@ -554,7 +554,7 @@ def update_pet_status(
         )
 
         # Send email in background, using user's email as the `From` field
-        background_tasks.add_task(send_email, prev_owner.email, subject, body, user.email)
+        background_tasks.add_task(send_email, prev_owner.email, subject, body,user.email)
 
     return {
         "message": "Update submitted and previous owner notified via email.",
