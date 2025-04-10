@@ -17,6 +17,7 @@ from email.mime.multipart import MIMEMultipart
 from gemini_api import image_url_to_base64
 from gemini_api import describe_pet_traits_from_image
 from gemini_api import get_dist
+from gemini_api import chat
 import requests
 import json
 import base64
@@ -494,4 +495,10 @@ def report(
 
 
 
+######################## CHATBOT ##################################
+
+@app.post("/sendChat")
+def send_chat(query:str,db:db_dependencies):
+    response = chat(query)
+    return {"bot says:":response}
 

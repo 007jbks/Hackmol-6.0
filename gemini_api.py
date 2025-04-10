@@ -121,3 +121,33 @@ def get_dist(address1,address2):
         return False
     
 print(get_dist("Delhi","Delhi"))
+
+
+
+
+def chat(query,API_KEY=API_KEY,URL=URL,system_prompt="You are now a chatbot for this pet adoption site where you must help the user with whatever help he/she needs respond only in human like chatbot form"):
+    
+
+    data = {
+        "contents": [{
+            "parts": [{"text":system_prompt+query}]
+        }]
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(URL, headers=headers, data=json.dumps(data))
+
+    if response.status_code == 200:
+        result = response.json()  
+        
+        try:
+            response_text = result["candidates"][0]["content"]["parts"][0]["text"]
+            return response_text
+        except (KeyError, IndexError) as e:
+            print("Error parsing response:", e)
+            print("Full response:", result)
+    else:
+        print("Error:", response.status_code, response.text)
