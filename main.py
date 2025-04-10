@@ -370,7 +370,7 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
                  token : str = Form(...)
                  ):
     username = verify_access_token(token)
-    user = db.query(models.User).filter(models.User.username==username)
+    user = db.query(models.User).filter(models.User.username==username).first()
     result = cloudinary.uploader.upload(file.file, folder="pets_images")
     image_url = result.get("secure_url")
     if not image_url:
@@ -414,6 +414,7 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
     return {
         "matched_pet": {
             "name": top_match.name,
+            "id":id,
             "image": top_match.image,
             "traits": top_match.traits,
             "description": top_match.description,
