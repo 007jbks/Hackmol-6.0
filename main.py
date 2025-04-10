@@ -111,14 +111,14 @@ def signup(user:UserCreate,db:db_dependencies):
 def get_user(db:db_dependencies):
     return db.query(models.User).all()
 
-@app.post("/deleteuser")
-def delete_user(id:int,db:db_dependencies):
-    user = db.query(models.User).filter(models.User.id==id).first()
-    if not user:
-        raise HTTPException(status_code=404,detail = "User not found")
-    db.delete(user)
-    db.commit()
-    return {"message":"User deleted successfully"}
+# @app.post("/deleteuser")
+# def delete_user(id:int,db:db_dependencies):
+#     user = db.query(models.User).filter(models.User.id==id).first()
+#     if not user:
+#         raise HTTPException(status_code=404,detail = "User not found")
+#     db.delete(user)
+#     db.commit()
+#     return {"message":"User deleted successfully"}
 
 @app.post("/login")
 def login(user:UserLogin,db:db_dependencies):
