@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from auth import create_access_token,verify_access_token
 from fastapi import Form
 from sqlalchemy import case, func
+from typing import Optional
 ##################################################################
 #For email part
 import smtplib
