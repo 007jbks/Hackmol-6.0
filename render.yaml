@@ -14,4 +14,6 @@ services:
 
 databases:
   - name: test_db_j7tr
+    databaseName: db_uqj2  # ✅ this is your actual Postgres database name
+    user: db_user
     plan: free
