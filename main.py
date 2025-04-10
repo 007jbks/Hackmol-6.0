@@ -366,7 +366,11 @@ def buy_pet(
 
 
 @app.post("/facial_match")
-def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
+def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
+                 token : str = Form(...)
+                 ):
+    username = verify_access_token(token)
+    user = db.query(models.User).filter(models.User.username==username)
     result = cloudinary.uploader.upload(file.file, folder="pets_images")
     image_url = result.get("secure_url")
     if not image_url:
@@ -386,6 +390,8 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
             continue
 
         if not pet_traits:
+            continue
+        if pet.seller_id == user.id:
             continue
 
         matches = sum(
