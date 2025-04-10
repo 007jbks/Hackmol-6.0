@@ -73,6 +73,7 @@ class UserCreate(BaseModel):
     username : str
     password : str
     email : str
+    registration_number : str
 
 class UserLogin(BaseModel):
     email : str
@@ -96,14 +97,17 @@ db_dependencies = Annotated[Session,Depends(get_db)]
 @app.post("/signup")
 def signup(user:UserCreate,db:db_dependencies):
     u = db.query(models.User).filter(models.User.username==user.username).first()
+    
     if not u:
         new_user = models.User(username=user.username,hashed_password=user.password,email=user.email)
-        new_user.set_password(user.password)
+        new_user.set_password(user.password,ngo_registration_number = user.registration_number,
+        is_ngo=bool(user.registration_number))
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
         access_token = create_access_token(data={"sub": new_user.username})
         return {"access_token": access_token, "token_type": "bearer"}
+    
     else:
         raise HTTPException(status_code=400,detail="Username taken")
 

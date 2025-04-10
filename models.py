@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String,ForeignKey , JSON
+from sqlalchemy import Column, Integer, String,ForeignKey , JSON, Boolean
 from database import Base
 from sqlalchemy.orm import relationship
 import bcrypt
@@ -9,6 +9,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)  
     hashed_password = Column(String) 
+    ngo_registration_number = Column(Integer, unique=True, index=True,nullable=True)
+    is_ngo = Column(Boolean,index=True,nullable=True)
     email = Column(String,index=True)
 
     def set_password(self, password: str):
@@ -41,8 +43,8 @@ class Pet(Base):
 class NGO(Base):
     __tablename__ = "ngo" 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)  
-    ngo_registration_number = Column(String, unique=True, index=True)
+    username = Column(String, index=True)  
+    
     hashed_password = Column(String) 
     email = Column(String, index=True)
 

@@ -2,7 +2,7 @@
 @app.post("/ngo/signup")
 def register_ngo(
     username: str = Form(...),
-    ngo_registration_number: str = Form(...),
+    ngo_registration_number: int = Form(...),
     password: str = Form(...),
     email: str = Form(...),
     db: Session = Depends(get_db)
