@@ -66,7 +66,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-models.Base.metadata.drop_all(bind=engine)
+#models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
