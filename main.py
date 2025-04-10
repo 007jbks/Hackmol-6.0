@@ -364,3 +364,53 @@ def buy_pet(
 
     return {"message": "Request successfully sent and seller notified."}
 
+
+@app.get("/facial_match")
+def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    result = cloudinary.uploader.upload(file.file, folder="pets_images")
+    image_url = result.get("secure_url")
+    if not image_url:
+        raise HTTPException(status_code=500, detail="Failed to upload image.")
+
+    # Get traits from Gemini
+    traits_response = describe_pet_traits_from_image(image_url)
+    user_traits = json.loads(traits_response) if isinstance(traits_response, str) else traits_response
+
+    pets = db.query(models.Pet).all()
+    best_matches = []
+
+    for pet in pets:
+        try:
+            pet_traits = json.loads(pet.traits) if isinstance(pet.traits, str) else pet.traits
+        except:
+            continue
+
+        if not pet_traits:
+            continue
+
+        matches = sum(
+            1 for key in user_traits if key in pet_traits and user_traits[key] == pet_traits[key]
+        )
+        best_matches.append((matches, pet))
+
+    best_matches.sort(reverse=True, key=lambda x: x[0])
+
+    # If there are matches, return the best one
+    if best_matches and best_matches[0][0] > 0:
+        top_match = best_matches[0][1]
+    else:
+        # Emergency fallback: return a random pet (or customize this logic)
+        top_match = pets[0] if pets else None
+
+    if not top_match:
+        raise HTTPException(status_code=404, detail="No pets available.")
+
+    return {
+        "matched_pet": {
+            "name": top_match.name,
+            "image": top_match.image,
+            "traits": top_match.traits,
+            "description": top_match.description,
+            # add more fields if needed
+        }
+    }
