@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 #for the token system
 from auth import create_access_token,verify_access_token
 from fastapi import Form
+from sqlalchemy import case, func
 ##################################################################
 #For email part
 import smtplib
@@ -190,41 +191,43 @@ def sell_pet(
     return {"message": f"{name} added successfully"}
 
 
-@app.get("/pets")
-def get_pets(db:db_dependencies):
-    return db.query(models.Pet).all()
+
 
 @app.post("/interest")
 def search_pet(
     species: str = Form(...),
     token: str = Form(...),
-    breed : str = Form(...),
-    gender : str = Form(...),
-    weight_range : str = Form(...),
-    age_range : str = Form(...),
-    color_markings : str = Form(...),
+    breed: str = Form(...),
+    gender: str = Form(...),
+    weight_range: str = Form(...),
+    age_range: str = Form(...),
+    color_markings: str = Form(...),
     db: Session = Depends(get_db)
 ):
     username = verify_access_token(token)
     poi = db.query(models.User).filter(models.User.username == username).first()
     if not poi:
-        raise HTTPException(status_code=400,detail="user doesn't exist")
+        raise HTTPException(status_code=400, detail="user doesn't exist")
+
     try:
         min_weight, max_weight = map(int, weight_range.split('-')) 
-        min_age,max_age = map(int,age_range.split('-'))
+        min_age, max_age = map(int, age_range.split('-'))
     except ValueError:
         return {"error": "Invalid range format. Use 'min-max'"}
-    #Matching Algorithm
-    pets = db.query(models.Pet).filter(
-        models.Pet.species == species,
-        models.Pet.breed == breed,
-        models.Pet.gender == gender,
-        models.Pet.color_markings.ilike(f"%{color_markings}%"),
-        models.Pet.weight >= min_weight,
-        models.Pet.weight <= max_weight,
-        models.Pet.age >= min_age,
-        models.Pet.age <= max_age
-    ).all()
+
+    # Partial matching using match score
+    score_expr = (
+        case((models.Pet.species == species, 1), else_=0) +
+        case((models.Pet.breed == breed, 1), else_=0) +
+        case((models.Pet.gender == gender, 1), else_=0) +
+        case((models.Pet.color_markings.ilike(f"%{color_markings}%"), 1), else_=0) +
+        case((models.Pet.weight >= min_weight, 1), else_=0) +
+        case((models.Pet.weight <= max_weight, 1), else_=0) +
+        case((models.Pet.age >= min_age, 1), else_=0) +
+        case((models.Pet.age <= max_age, 1), else_=0)
+    ).label("match_score")
+
+    matched_pets = db.query(models.Pet, score_expr).having(score_expr >= 4).all()
 
     return {
         "matches": [
@@ -237,13 +240,69 @@ def search_pet(
                 "weight": pet.weight,
                 "age": pet.age,
                 "color_markings": pet.color_markings,
-                "health":pet.health,
-                "description":pet.description,
-                "image_url":pet.image
+                "health": pet.health,
+                "description": pet.description,
+                "image_url": pet.image
             }
-            for pet in pets
+            for pet, _ in matched_pets
         ]
     }
+
+
+# @app.get("/pets")
+# def get_pets(db:db_dependencies):
+#     return db.query(models.Pet).all()
+
+# @app.post("/interest")
+# def search_pet(
+#     species: str = Form(...),
+#     token: str = Form(...),
+#     breed : str = Form(...),
+#     gender : str = Form(...),
+#     weight_range : str = Form(...),
+#     age_range : str = Form(...),
+#     color_markings : str = Form(...),
+#     db: Session = Depends(get_db)
+# ):
+#     username = verify_access_token(token)
+#     poi = db.query(models.User).filter(models.User.username == username).first()
+#     if not poi:
+#         raise HTTPException(status_code=400,detail="user doesn't exist")
+#     try:
+#         min_weight, max_weight = map(int, weight_range.split('-')) 
+#         min_age,max_age = map(int,age_range.split('-'))
+#     except ValueError:
+#         return {"error": "Invalid range format. Use 'min-max'"}
+#     #Matching Algorithm
+#     pets = db.query(models.Pet).filter(
+#         models.Pet.species == species,
+#         models.Pet.breed == breed,
+#         models.Pet.gender == gender,
+#         models.Pet.color_markings.ilike(f"%{color_markings}%"),
+#         models.Pet.weight >= min_weight,
+#         models.Pet.weight <= max_weight,
+#         models.Pet.age >= min_age,
+#         models.Pet.age <= max_age
+#     ).all()
+
+#     return {
+#         "matches": [
+#             {
+#                 "id": pet.id,
+#                 "name": pet.name,
+#                 "species": pet.species,
+#                 "breed": pet.breed,
+#                 "gender": pet.gender,
+#                 "weight": pet.weight,
+#                 "age": pet.age,
+#                 "color_markings": pet.color_markings,
+#                 "health":pet.health,
+#                 "description":pet.description,
+#                 "image_url":pet.image
+#             }
+#             for pet in pets
+#         ]
+#     }
 
 
 # @app.post("/buy")
