@@ -493,6 +493,7 @@ def report(
 
         print(f"📧 Sending email to: {recipient.email}")
         background_tasks.add_task(send_email, recipient.email, subject, body)
+        print(f"message sent")
 
     return {"message": "Report submitted and notifications sent."}
 
