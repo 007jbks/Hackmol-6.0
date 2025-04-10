@@ -396,7 +396,7 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
         }
     }
 
-app.get("/pets")
+@app.get("/pets")
 def get_pets(db:Session = Depends(get_db)):
     return db.query(models.Pet).all()
 
@@ -407,22 +407,32 @@ def get_pets(db:Session = Depends(get_db)):
 #Firstly transfer the ownership from the prev owner to new owner
 @app.post("/transfer")
 def transfer(
-    token : str = Form(...),
-    new_owner_email_id : str = Form(...),
-    pet_name : str = Form(...),
+    token: str = Form(...),
+    new_owner_email_id: str = Form(...),
+    pet_name: str = Form(...),
     db: Session = Depends(get_db)
 ):
     username = verify_access_token(token)
-    user = db.query(models.User).filter(models.User.username==username).first()
+
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Invalid user")
+
     pet = db.query(models.Pet).filter(models.Pet.name == pet_name).first()
     if not pet:
-        raise HTTPException(status_code=400,detail="This pet doesn't exist")
-    if user.id !=pet.seller_id:
-        raise HTTPException(status_code=400,detail="You are not the owner of this pet.")
-    new_owner = db.query(models.User).filter(models.User.email==new_owner_email_id).first()
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+    if pet.seller_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not the original seller")
+
+    new_owner = db.query(models.User).filter(models.User.email == new_owner_email_id).first()
+    if not new_owner:
+        raise HTTPException(status_code=404, detail="New owner not found")
+
     pet.owner_id = new_owner.id
     db.commit()
-    return {"message":f"{new_owner.username} now owns {pet.name}"}
+
+    return {"message": f"{new_owner.username} now owns {pet.name}"}
 
 @app.post("/update")
 def update():
