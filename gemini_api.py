@@ -81,50 +81,42 @@ Output strictly in this JSON format (no explanation or extra text):
         print(response.text)
 
 
-def calc_dist(address1, address2):
-    prompt = f"""
-    You are given two addresses: "{address1}" and "{address2}". 
-    Estimate the rough coordinates based on city, district, and country. 
-    Then calculate the distance and return only "True" (if less than 100 km) or "False" (if more). No explanation.
-    """
+import requests
 
-    data = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": prompt
-                    }
-                ]
-            }
-        ]
+def get_coordinates(address):
+    url = "https://api.opencagedata.com/geocode/v1/json"
+    params = {
+        "q": address,
+        "key": "80abcd9793604bfb8f0f4769b4c8ecd0"
     }
+    response = requests.get(url, params=params)
+    data = response.json()
+    if data['results']:
+        lat = data['results'][0]['geometry']['lat']
+        lng = data['results'][0]['geometry']['lng']
+        return lat, lng
+    return None, None
 
-    headers = {
-        "Content-Type": "application/json"
-    }
+from math import radians, cos, sin, asin, sqrt
 
-    try:
-        response = requests.post(URL, headers=headers, data=json.dumps(data))
 
-        if response.status_code == 200:
-            result = response.json()
-            text = result["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Radius of Earth in km
 
-            if "true" or "True" in text:
-                return True
-            elif "false" or "False" in text:
-                return False
-            else:
-                print(f"Unexpected Gemini response: {text}")
-        else:
-            print("Gemini API error:", response.status_code, response.text)
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
 
-    except Exception as e:
-        print("Error in calc_dist:", str(e))
+    a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    return R * c
 
+
+def get_dist(address1,address2):
+    lat1,lon1 = get_coordinates(address1)
+    lat2,lon2 = get_coordinates(address2)
+    dist = haversine(lat1,lon1,lat2,lon2)
+    if dist<=100:
+        return True
+    else:
+        return False
     
-    return False
-
-
-print(calc_dist("Chennai India","Mumbai India"))
