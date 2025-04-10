@@ -20,6 +20,8 @@ from gemini_api import get_dist
 import requests
 import json
 import base64
+import logging
+
 
 
 def send_email(to_email, subject, body):
@@ -213,6 +215,12 @@ def sell_pet(
 
 from  gemini_api import get_dist  # Assuming your get_dist() function is here
 
+
+
+# Setup logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 @app.post("/interest")
 def search_pet(
     species: str = Form(...),
@@ -227,14 +235,17 @@ def search_pet(
     username = verify_access_token(token)
     poi = db.query(models.User).filter(models.User.username == username).first()
     if not poi:
+        logger.warning(f"User '{username}' does not exist.")
         raise HTTPException(status_code=400, detail="user doesn't exist")
 
     user_address = poi.address
+    logger.info(f"Searching pets for user '{username}' at address: {user_address}")
 
     try:
         min_weight, max_weight = map(int, weight_range.split('-')) 
         min_age, max_age = map(int, age_range.split('-'))
     except ValueError:
+        logger.error(f"Invalid range format received: weight='{weight_range}', age='{age_range}'")
         return {"error": "Invalid range format. Use 'min-max'"}
 
     score_expr = (
@@ -249,17 +260,21 @@ def search_pet(
     ).label("match_score")
 
     pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 1).all()
+    logger.info(f"Found {len(pets_with_scores)} pets with score >= 1.")
 
     nearby_matches = []
 
     for pet, score in pets_with_scores:
         owner = db.query(models.User).filter(models.User.id == pet.owner_id).first()
         if not owner or not owner.address:
+            logger.warning(f"Pet {pet.id} has no owner or owner has no address.")
             continue
-        print(owner.address," ",user_address, flush=True)
+
+        logger.debug(f"Comparing pet address '{owner.address}' with user address '{user_address}'")
+
         try:
             if get_dist(user_address, owner.address): 
-                print("Get dist is true.",flush=True)
+                logger.info(f"Pet {pet.id} matched on distance with user '{username}'.")
                 nearby_matches.append({
                     "id": pet.id,
                     "name": pet.name,
@@ -274,10 +289,12 @@ def search_pet(
                     "image_url": pet.image
                 })
         except Exception as e:
-            print(f"Error calculating distance for pet {pet.id}: {e}")
+            logger.error(f"Error calculating distance for pet {pet.id}: {e}")
             continue
 
+    logger.info(f"Returning {len(nearby_matches)} nearby pet matches for user '{username}'")
     return {"matches": nearby_matches}
+
 
 
 
