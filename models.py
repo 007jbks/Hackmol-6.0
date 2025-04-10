@@ -36,3 +36,19 @@ class Pet(Base):
     seller_id = Column(Integer, ForeignKey("user.id"), index=True, nullable=False)
     owner_id = Column(Integer, ForeignKey("user.id"), index=True, nullable=True)  
     potential_owner_id = Column(Integer, ForeignKey("user.id"),index=True)
+
+
+class NGO(Base):
+    _tablename_ = "ngo" 
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)  
+    ngo_registration_number = Column(String, unique=True, index=True)
+    hashed_password = Column(String) 
+    email = Column(String, index=True)
+
+    def set_password(self, password: str):
+        salt = bcrypt.gensalt()
+        self.hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
+    def verify_password(self, password: str) -> bool:
+        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
