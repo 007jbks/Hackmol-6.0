@@ -66,7 +66,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-models.Base.metadata.drop_all(bind=engine)
+#models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
@@ -99,9 +99,9 @@ def signup(user:UserCreate,db:db_dependencies):
     u = db.query(models.User).filter(models.User.username==user.username).first()
     
     if not u:
-        new_user = models.User(username=user.username,hashed_password=user.password,email=user.email)
-        new_user.set_password(user.password,ngo_registration_number = user.registration_number,
+        new_user = models.User(username=user.username,hashed_password=user.password,email=user.email,ngo_registration_number = user.registration_number,
         is_ngo=bool(user.registration_number))
+        new_user.set_password(user.password)
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
