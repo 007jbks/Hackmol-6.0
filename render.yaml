@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fastapi-backend
+    runtime: python
+    region: oregon  # Change as needed
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: test_db_j7tr
+          property: connectionString
+
+databases:
+  - name: test_db_j7tr
+    plan: free
