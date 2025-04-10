@@ -53,6 +53,8 @@ def send_email(to_email, subject, body):
 import cloudinary
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
+import smtplib
+smtplib.SMTP.debuglevel = 1  # Add this at the top of your file
 
 
 # Configuration       
@@ -431,6 +433,8 @@ def update():
 ################New send mail logic for this######################
 
 def send_email(to_email: str, subject: str, body: str):
+    sender_email = "jon00doe00297@gmail.com"
+    sender_password = "bdaykyslqvzdulsn"  
     if not to_email or '@' not in to_email:
         print(f"❌ Skipping invalid email: {to_email}")
         return
@@ -443,7 +447,7 @@ def send_email(to_email: str, subject: str, body: str):
 
         with smtplib.SMTP("smtp.yourmailserver.com", 587) as server:
             server.starttls()
-            server.login("yourapp@example.com", "yourpassword")
+            server.login(sender_email, sender_password)
             server.send_message(msg)
 
         print(f"✅ Email sent to: {to_email}")
