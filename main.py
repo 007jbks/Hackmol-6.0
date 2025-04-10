@@ -82,7 +82,6 @@ class UserCreate(BaseModel):
     email : str
     registration_number : Optional[int] = None
     address : str
-    contact :int
 
 class UserLogin(BaseModel):
     email : str
@@ -109,7 +108,7 @@ def signup(user:UserCreate,db:db_dependencies):
     
     if not u:
         new_user = models.User(username=user.username,hashed_password=user.password,email=user.email,ngo_registration_number = user.registration_number,
-        is_ngo=bool(user.registration_number),address=user.address,contact=user.contact)
+        is_ngo=bool(user.registration_number),address=user.address)
         new_user.set_password(user.password)
         db.add(new_user)
         db.commit()
@@ -328,7 +327,7 @@ def buy_pet(
     body = (
         f"Hello {seller.username},\n\n"
         f"{buyer.username} is interested in adopting your pet '{pet.name}' ({pet.species}, {pet.breed}).\n"
-        f"Contact Info: email:{buyer.email if hasattr(buyer, 'email') else 'N/A'} and phone:{buyer.contact}\n\n"
+        f"Contact Info: email:{buyer.email if hasattr(buyer, 'email') else 'N/A'} \n\n"
         f"Please log in to view their profile and respond to the request.\n\n"
         f"- Pets"
     )
@@ -510,8 +509,6 @@ def send_chat(query:str,db:db_dependencies):
 
 ############################ Updating the pet's status ######################
 
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 @app.post("/update")
 def update_pet_status(
@@ -519,7 +516,8 @@ def update_pet_status(
     date: str = Form(...),
     file: UploadFile = File(...),
     token: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = Depends()
 ):
     username = verify_access_token(token)
     user = db.query(models.User).filter(models.User.username == username).first()
@@ -549,15 +547,17 @@ def update_pet_status(
         subject = f"📷 Pet Update Received - {pet.species.title()} ({pet.breed})"
         body = (
             f"Hello {prev_owner.username},\n\n"
-            f"The new owner has shared an update about the pet you previously owned.\n"
+            f"The new owner ({user.username}) has shared an update about the pet you previously owned.\n"
             f"📅 Date: {date}\n"
             f"🖼️ Image Link: {pet.update_image_url}\n\n"
             f"Regards,\nPet Alert System"
         )
-        background_tasks = BackgroundTasks()
-        background_tasks.add_task(send_email, prev_owner.email, subject, body,user.email)
+
+        # Send email in background, using user's email as the `From` field
+        background_tasks.add_task(send_email, prev_owner.email, subject, body, user.email)
 
     return {
         "message": "Update submitted and previous owner notified via email.",
         "image": pet.update_image_url
     }
+
