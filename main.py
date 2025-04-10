@@ -260,7 +260,7 @@ def search_pet(
     ).label("match_score")
 
     pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 3).all()
-    logger.info(f"Found {len(pets_with_scores)} pets with score >= 1.")
+    logger.info(f"Found {len(pets_with_scores)} pets with score >= 3.")
 
     nearby_matches = []
 
@@ -395,3 +395,31 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
             # add more fields if needed
         }
     }
+
+
+
+###########################################################################
+#This will be the updates section
+
+#Firstly transfer the ownership from the prev owner to new owner
+@app.post("/transfer")
+def transfer(
+    token : str = Form(...),
+    new_owner_email_id : str = Form(...),
+    pet_name : str = Form(...),
+    db: Session = Depends(get_db)
+):
+    username = verify_access_token(token)
+    user = db.query(models.User).filter(models.User.username==username).first()
+    pet = db.query(models.Pet).filter(models.Pet.name == pet_name).first()
+    if user.id !=pet.seller_id:
+        raise HTTPException(status_code=400,detail="You are not the owner of this pet.")
+    new_owner = db.query(models.User).filter(models.User.email==new_owner_email_id).first()
+    pet.owner_id = new_owner.id
+    db.commit()
+    return {"message":f"{new_owner.username} now owns {pet.name}"}
+
+
+@app.post("/update")
+def update():
+    pass
