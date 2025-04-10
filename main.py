@@ -66,7 +66,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-#models.Base.metadata.drop_all(bind=engine)
+models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
@@ -221,7 +221,7 @@ def sell_pet(
     # Get traits from Gemini
     traits_response = describe_pet_traits_from_image(image_url)
     try:
-        traits = json.loads(traits_response)  # Ensure it's valid JSON
+        traits = traits_response  # Ensure it's valid JSON
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="Failed to parse traits JSON.")
 
