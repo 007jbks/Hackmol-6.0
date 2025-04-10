@@ -44,7 +44,7 @@ class Pet(Base):
 
 class Abandoned(Base):
     __tablename__ = "abandoned"
-    species = Column(String,index=True)
+    species = Column(String,index=True,primary_key=True)
     breed = Column(String,index=True,nullable=True)
     gender = Column(String,index=True)
     markings = Column(String,index=True)
