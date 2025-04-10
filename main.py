@@ -230,7 +230,7 @@ def search_pet(
     ).label("match_score")
 
     # Add match_score as a column and use filter instead of having
-    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 4).all()
+    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 1).all()
 
     return {
         "matches": [
