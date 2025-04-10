@@ -73,7 +73,7 @@ class UserCreate(BaseModel):
     username : str
     password : str
     email : str
-    registration_number : str
+    registration_number : int
 
 class UserLogin(BaseModel):
     email : str
