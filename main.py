@@ -414,7 +414,7 @@ def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db),
     return {
         "matched_pet": {
             "name": top_match.name,
-            "id":id,
+            "id":top_match.id,
             "image": top_match.image,
             "traits": top_match.traits,
             "description": top_match.description,
