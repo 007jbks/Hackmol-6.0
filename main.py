@@ -16,7 +16,7 @@ from email.mime.multipart import MIMEMultipart
 #for gemini api
 from gemini_api import image_url_to_base64
 from gemini_api import describe_pet_traits_from_image
-from gemini_api import calc_dist
+from gemini_api import get_dist
 import requests
 import json
 import base64
