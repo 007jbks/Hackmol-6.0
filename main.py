@@ -248,7 +248,7 @@ def search_pet(
         case((models.Pet.age <= max_age, 1), else_=0)
     ).label("match_score")
 
-    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 2).all()
+    pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 1).all()
 
     nearby_matches = []
 
