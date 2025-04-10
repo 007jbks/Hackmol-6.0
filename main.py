@@ -265,7 +265,7 @@ def search_pet(
     nearby_matches = []
 
     for pet, score in pets_with_scores:
-        owner = db.query(models.User).filter(models.User.id == pet.owner_id).first()
+        owner = db.query(models.User).filter(models.User.id == pet.seller_id).first()
         if not owner or not owner.address:
             logger.warning(f"Pet {pet.id} has no owner or owner has no address.")
             continue
