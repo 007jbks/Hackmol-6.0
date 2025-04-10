@@ -256,10 +256,10 @@ def search_pet(
         owner = db.query(models.User).filter(models.User.id == pet.owner_id).first()
         if not owner or not owner.address:
             continue
-        print(owner.address," ",user_address)
+        print(owner.address," ",user_address, flush=True)
         try:
             if get_dist(user_address, owner.address): 
-                print("Get dist is true.")
+                print("Get dist is true.",flush=True)
                 nearby_matches.append({
                     "id": pet.id,
                     "name": pet.name,
