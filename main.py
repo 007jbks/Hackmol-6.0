@@ -70,14 +70,14 @@ def read_root():
     return {"message": "Hello, World!"}
 
 #Base.metadata.drop_all(engine) 
-models.Base.metadata.drop_all(bind=engine)
+#models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
 class UserCreate(BaseModel):
     username : str
     password : str
     email : str
-    registration_number : int
+    registration_number : Optional[int] = None
     address : str
 
 class UserLogin(BaseModel):
@@ -421,6 +421,8 @@ def transfer(
     db.commit()
     return {"message": f"{new_owner.username} now owns {pet.name}"}
 
+############################ Updating the pet's status ######################
+
 @app.post("/update")
 def update():
     pass
@@ -499,6 +501,7 @@ def report(
 
 @app.post("/sendChat")
 def send_chat(query:str,db:db_dependencies):
+    
     response = chat(query)
     return {"bot says:":response}
 
