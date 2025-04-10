@@ -137,60 +137,125 @@ def login(user:UserLogin,db:db_dependencies):
 ############################# MAIN LOGIC OF APP STARTS HERE ###################
 
 #This is for selling of a pet:
+# @app.post("/sell")
+# def sell_pet(
+#     name: str = Form(...),
+#     species: str = Form(...),
+#     token: str = Form(...),
+#     file: UploadFile = File(...),
+#     breed : str = Form(...),
+#     gender : str = Form(...),
+#     weight : int = Form(...),
+#     age : int = Form(...),
+#     health : str = Form(...),
+#     description : str = Form(...),
+#     color_markings : str = Form(...),
+#     db: Session = Depends(get_db)
+# ):
+#     username = verify_access_token(token)
+#     seller = db.query(models.User).filter(models.User.username == username).first()
+#     if not seller:
+#         raise HTTPException(status_code=400,detail="user doesn't exist")
+#     result = cloudinary.uploader.upload(file.file, folder="pets_images")
+#     image_url = result.get("secure_url")
+#     traits = describe_pet_traits_from_image(image_url)
+
+
+#     if not image_url:
+#         raise HTTPException(status_code=500, detail="Failed to get image URL")
+
+#     existing_pet = db.query(models.Pet).filter(
+#         models.Pet.name == name,
+#         models.Pet.seller_id == seller.id
+#     ).first()
+
+#     if existing_pet:
+#         raise HTTPException(status_code=400, detail="You already listed this pet.")
+
+#     pet = models.Pet(name=name, 
+#                      species=species,
+#                        seller_id=seller.id,
+#                          image=image_url,
+#                          age=age,
+#                          weight=weight,
+#                          health=health,
+#                          description=description,
+#                          breed=breed,
+#                          color_markings = color_markings,
+#                          gender=gender,
+#                          traits=traits
+#                          )
+#     db.add(pet)
+#     db.commit()
+#     db.refresh(pet)
+
+#     return {"message": f"{name} added successfully also {traits}"}
+
 @app.post("/sell")
 def sell_pet(
     name: str = Form(...),
     species: str = Form(...),
     token: str = Form(...),
     file: UploadFile = File(...),
-    breed : str = Form(...),
-    gender : str = Form(...),
-    weight : int = Form(...),
-    age : int = Form(...),
-    health : str = Form(...),
-    description : str = Form(...),
-    color_markings : str = Form(...),
+    breed: str = Form(...),
+    gender: str = Form(...),
+    weight: int = Form(...),
+    age: int = Form(...),
+    health: str = Form(...),
+    description: str = Form(...),
+    color_markings: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    # Verify user from token
     username = verify_access_token(token)
     seller = db.query(models.User).filter(models.User.username == username).first()
     if not seller:
-        raise HTTPException(status_code=400,detail="user doesn't exist")
+        raise HTTPException(status_code=400, detail="User doesn't exist.")
+
+    # Upload image to Cloudinary
     result = cloudinary.uploader.upload(file.file, folder="pets_images")
     image_url = result.get("secure_url")
-    traits = describe_pet_traits_from_image(image_url)
-
-
     if not image_url:
-        raise HTTPException(status_code=500, detail="Failed to get image URL")
+        raise HTTPException(status_code=500, detail="Failed to upload image.")
 
+    # Get traits from Gemini
+    traits_response = describe_pet_traits_from_image(image_url)
+    try:
+        traits = json.loads(traits_response)  # Ensure it's valid JSON
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse traits JSON.")
+
+    # Check for existing pet
     existing_pet = db.query(models.Pet).filter(
         models.Pet.name == name,
         models.Pet.seller_id == seller.id
     ).first()
-
     if existing_pet:
         raise HTTPException(status_code=400, detail="You already listed this pet.")
 
-    pet = models.Pet(name=name, 
-                     species=species,
-                       seller_id=seller.id,
-                         image=image_url,
-                         age=age,
-                         weight=weight,
-                         health=health,
-                         description=description,
-                         breed=breed,
-                         color_markings = color_markings,
-                         gender=gender,
-                         traits=traits
-                         )
+    # Create and save pet
+    pet = models.Pet(
+        name=name,
+        species=species,
+        seller_id=seller.id,
+        image=image_url,
+        age=age,
+        weight=weight,
+        health=health,
+        description=description,
+        breed=breed,
+        color_markings=color_markings,
+        gender=gender,
+        traits=traits
+    )
     db.add(pet)
     db.commit()
     db.refresh(pet)
 
-    return {"message": f"{name} added successfully also {traits}"}
-
+    return {
+        "message": f"{name} listed successfully.",
+        "traits": traits
+    }
 
 
 
