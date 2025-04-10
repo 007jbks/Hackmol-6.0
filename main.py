@@ -365,7 +365,7 @@ def buy_pet(
     return {"message": "Request successfully sent and seller notified."}
 
 
-@app.get("/facial_match")
+@app.post("/facial_match")
 def facial_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
     result = cloudinary.uploader.upload(file.file, folder="pets_images")
     image_url = result.get("secure_url")
