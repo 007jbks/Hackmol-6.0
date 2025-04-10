@@ -79,3 +79,45 @@ Output strictly in this JSON format (no explanation or extra text):
     else:
         print("Request failed with status:", response.status_code)
         print(response.text)
+
+
+def calc_dist(address1, address2):
+    prompt = f"""You are given two addresses: "{address1}" and "{address2}".
+Determine their rough coordinates using your web knowledge or city-level approximation,
+calculate the distance between them, and respond ONLY with True if it's under 100km,
+else respond with False. Do NOT include any explanation or extra text. Output strictly True or False."""
+
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": prompt
+                    }
+                ]
+            }
+        ]
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(URL, headers=headers, data=json.dumps(data))
+
+    if response.status_code == 200:
+        try:
+            result = response.json()
+            output = result["candidates"][0]["content"]["parts"][0]["text"].strip().lower()
+            if "true" in output:
+                return True
+            elif "false" in output:
+                return False
+            else:
+                raise Exception("Unexpected response format:", output)
+        except Exception as e:
+            print("Error:", e)
+            print("Raw response:", json.dumps(result, indent=2))
+    else:
+        print("Request failed with status:", response.status_code)
+        print(response.text)

@@ -16,6 +16,7 @@ from email.mime.multipart import MIMEMultipart
 #for gemini api
 from gemini_api import image_url_to_base64
 from gemini_api import describe_pet_traits_from_image
+from gemini_api import calc_dist
 import requests
 import json
 import base64
@@ -227,6 +228,8 @@ def search_pet(
     if not poi:
         raise HTTPException(status_code=400, detail="user doesn't exist")
 
+    user_address = poi.address  # This is the address of the searching user
+
     try:
         min_weight, max_weight = map(int, weight_range.split('-')) 
         min_age, max_age = map(int, age_range.split('-'))
@@ -245,27 +248,36 @@ def search_pet(
         case((models.Pet.age <= max_age, 1), else_=0)
     ).label("match_score")
 
-    # Add match_score as a column and use filter instead of having
     pets_with_scores = db.query(models.Pet, score_expr).filter(score_expr >= 2).all()
 
-    return {
-        "matches": [
-            {
-                "id": pet.id,
-                "name": pet.name,
-                "species": pet.species,
-                "breed": pet.breed,
-                "gender": pet.gender,
-                "weight": pet.weight,
-                "age": pet.age,
-                "color_markings": pet.color_markings,
-                "health": pet.health,
-                "description": pet.description,
-                "image_url": pet.image
-            }
-            for pet, score in pets_with_scores
-        ]
-    }
+    nearby_matches = []
+
+    for pet, score in pets_with_scores:
+        owner = db.query(models.User).filter(models.User.id == pet.owner_id).first()
+        if not owner or not owner.address:
+            continue
+
+        # Call Gemini-based distance calculator
+        try:
+            if calc_dist(user_address, owner.address):
+                nearby_matches.append({
+                    "id": pet.id,
+                    "name": pet.name,
+                    "species": pet.species,
+                    "breed": pet.breed,
+                    "gender": pet.gender,
+                    "weight": pet.weight,
+                    "age": pet.age,
+                    "color_markings": pet.color_markings,
+                    "health": pet.health,
+                    "description": pet.description,
+                    "image_url": pet.image
+                })
+        except Exception as e:
+            print(f"Error checking distance for pet {pet.id}: {e}")
+            continue
+
+    return {"matches": nearby_matches}
 
 
 
