@@ -124,7 +124,8 @@ fun PetAppScreen() {
             PetButton(
                 text = "I WANT TO REHOME MY PET",
                 leftIcon = R.drawable.group_2198383,
-                showLeftIcon = true
+                showLeftIcon = true,
+                onClick = {}
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -132,7 +133,8 @@ fun PetAppScreen() {
             PetButton(
                 text = "I AM LOOKING FOR A PET",
                 rightIcon = R.drawable.vector_10,
-                showRightIcon = true
+                showRightIcon = true,
+                        onClick = {}
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -142,7 +144,8 @@ fun PetAppScreen() {
                 leftIcon = R.drawable.vector_11,
                 rightIcon = R.drawable.group_2198383,
                 showLeftIcon = true,
-                showRightIcon = true
+                showRightIcon = true,
+                onClick = {}
             )
         }
     }
@@ -154,12 +157,12 @@ fun PetButton(
     leftIcon: Int? = null,
     rightIcon: Int? = null,
     showLeftIcon: Boolean = false,
-    showRightIcon: Boolean = false
+    showRightIcon: Boolean = false,
+    onClick: () -> Unit,
+    modifier: Modifier=Modifier.fillMaxWidth(0.7f).height(50.dp)
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth(0.8f)
-            .height(65.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         // Left icon (outside the button) - placed first so it's behind the button
@@ -177,7 +180,7 @@ fun PetButton(
         // The actual button
         NeobrutalistButton(
             text = text,
-            onClick = { /* Handle click */ }
+            onClick = onClick
         )
 
         // Right icon (outside the button) - placed last so it's above the button
