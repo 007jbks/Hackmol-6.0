@@ -1,5 +1,6 @@
 package com.example.pets.connectingfiles.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pets.ChatMessage
@@ -8,16 +9,36 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.UUID
+import java.util.concurrent.TimeUnit
+
+private const val TAG = "ChatBotViewModel"
 
 class ChatBotViewModel : ViewModel() {
+
+    // Setup OkHttp client with logging for debugging
+    private val okHttpClient by lazy {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
 
     // API service for chat communication
     private val chatApiService: ChatApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://hackmol-6-0.onrender.com/") // Your API base URL
+            .baseUrl("https://hackmol-6-0.onrender.com/")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ChatApiService::class.java)
@@ -53,12 +74,17 @@ class ChatBotViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
+                Log.d(TAG, "Sending chat request with query: $userInput")
+
                 // Make API call
                 val response = chatApiService.sendChat(SendChat(userInput))
 
                 if (response.isSuccessful) {
-                    // Handle the response - note that we're checking both potential field names
-                    val botResponse = response.body()?.botSays ?: "Sorry, I couldn't process that"
+                    val responseBody = response.body()
+                    Log.d(TAG, "Response successful: $responseBody")
+
+                    // Get bot response text
+                    val botResponse = responseBody?.botSays ?: "Sorry, I couldn't process that"
 
                     // Create and add bot message
                     val botMessage = ChatMessage(
@@ -69,14 +95,44 @@ class ChatBotViewModel : ViewModel() {
 
                     _messages.value = _messages.value + botMessage
                 } else {
-                    _errorMessage.value = "Error: ${response.code()} - ${response.message()}"
+                    val errorBody = response.errorBody()?.string()
+                    Log.e(TAG, "Error response: ${response.code()} - ${response.message()}")
+                    Log.e(TAG, "Error body: $errorBody")
+
+                    _errorMessage.value = "Error ${response.code()}: ${response.message()}\n$errorBody"
+
+                    // Fall back to offline mode on error
+                    sendMessageOfflineAfterError(userInput)
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Network error", e)
                 _errorMessage.value = "Network error: ${e.message}"
-                e.printStackTrace() // Log the error for debugging
+
+                // Fall back to offline mode on error
+                sendMessageOfflineAfterError(userInput)
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    /**
+     * Fallback to send an offline message when the API call fails
+     */
+    private fun sendMessageOfflineAfterError(userInput: String) {
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(500)
+
+            val botResponse = "I'm having trouble connecting to my servers right now. " +
+                    "Please try again later or check your internet connection."
+
+            val botMessage = ChatMessage(
+                id = UUID.randomUUID().toString(),
+                content = botResponse,
+                isUser = false
+            )
+
+            _messages.value = _messages.value + botMessage
         }
     }
 
