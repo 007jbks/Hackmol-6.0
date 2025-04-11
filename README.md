@@ -1,4 +1,31 @@
 # Hackmol-6.0
+# 🐾 PETS - Pet Adoption & Rehoming Platform
+
+Pets is a Kotlin-powered pet adoption platform where users can adopt pets, report abandoned animals to NGOs, buy and sell pets, and even find pets that resemble them through visual search powered by Google's **Gemini AI**.
+
+## 🌟 Features
+
+- 🐶 **Adopt & Rehome Pets:** Browse a wide range of pets available for adoption or rehoming by individuals or NGOs.
+- 📸 **Visual Search (AI-based):** Upload a photo of yourself to find pets that visually resemble you, thanks to Gemini AI's image-matching capabilities.
+- 🐾 **Report Abandoned Animals:** Help protect animals by reporting lost or abandoned pets directly to local NGOs for fast action and care.
+- 💰 **Buy & Sell Pets:** A secure marketplace to connect pet lovers and responsible breeders or pet owners.
+- 👤 **User-Friendly Dashboard:** Sign up to create your profile, list pets, track adoptions, and more.
+- 📍 **Geo-location Enabled:** Find pets and NGOs nearby using location-based services.
+
+## 🧠 Powered By
+
+- 💬 **Gemini AI** for visual similarity and personalized pet matching.
+- 🧑‍💻 **Kotlin** for robust backend logic and seamless Android app development.
+
+
+## 🚀 Getting Started
+
+1. **Clone the Repository**
+
+```bash
+git clone https://github.com/your-username/pawconnect.git
+cd pawconnect
+
 
 # 🐾 PETS - Pet Adoption & Reporting Platform (Backend)
 
@@ -161,7 +188,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## ✨ Author
+## ✨ Authors
 
-- 👨‍💻 Developed by [Kartik Sirohi](https://github.com/007jbks)
+- 👨‍💻 Developed by [Kartik Sirohi(backend), Ayush Podar(frontend), Aayush Sardana(frontend) , Samaira Wahi(UI/UX)]
 - 📧 Email: kartiksirohi383@gmail.com
