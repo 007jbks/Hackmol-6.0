@@ -40,13 +40,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.pets.R
+import com.example.pets.navigation.Screens
 import com.example.pets.onboarding.PetButton
 
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PetFormScreen2() {
+fun PetFormScreen2(navController: NavHostController) {
     var species by remember { mutableStateOf("") }
     var illness by remember { mutableStateOf("") }
     var wearingColor by remember { mutableStateOf("") }
@@ -226,7 +228,7 @@ fun PetFormScreen2() {
 
             // Next button
             Button(
-                onClick = { /* Handle next button click */ },
+                onClick = { navController.navigate(Screens.petrej2) },
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .height(40.dp),

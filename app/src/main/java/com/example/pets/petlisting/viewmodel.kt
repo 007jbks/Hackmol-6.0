@@ -1,5 +1,6 @@
-
 package com.example.pets.petlisting
+
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -21,8 +22,6 @@ data class PetListingUiState(
     val success: ListingResponse? = null,
     val error: String? = null
 )
-
-
 
 class PetListingViewModel : ViewModel() {
     private val repository = ApiRepository()
@@ -61,15 +60,15 @@ class PetListingViewModel : ViewModel() {
         }
     }
 
-    // Function to check if all required fields are filled
+    // Check if all required fields are filled
     fun isFormValid(): Boolean {
         return _uiState.value.petName.isNotBlank() &&
                 _uiState.value.petSpecies.isNotBlank() &&
                 _uiState.value.photoPath != null
     }
 
-    // Function to create a pet listing
-    fun createPetListing(token: String) {
+    // Function to create a pet listing (requires Context passed in)
+    fun createPetListing(token: String, context: Context) {
         if (!isFormValid()) {
             _uiState.update { currentState ->
                 currentState.copy(error = "Please fill all fields and select a photo")
@@ -78,37 +77,37 @@ class PetListingViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            // Set loading state
-            _uiState.update { currentState ->
-                currentState.copy(isLoading = true)
-            }
+            _uiState.update { currentState -> currentState.copy(isLoading = true) }
 
             try {
-                // Call the pet listing function with the current values
-                val result = repository.petListing(
+                val result = repository.listYourPet(
                     name = _uiState.value.petName,
                     species = _uiState.value.petSpecies,
                     token = token,
-                    photo = _uiState.value.photoPath!!
+                    breed = "Golden Retriever",
+                    gender = "Male",
+                    weight = 25,
+                    age = 3,
+                    health = "Healthy and vaccinated",
+                    description = "Friendly and playful dog.",
+                    colorMarkings = "Golden with white paws",
+                    fileUri = _uiState.value.photoUri ?: Uri.EMPTY,
+
+                    contentResolver = context.contentResolver
                 )
 
-                // Update UI state based on result
                 result.fold(
                     onSuccess = { response ->
-                        Log.d("token",token)
+                        Log.d("token", token)
                         Log.d("PetListingViewModel", "Pet listing success: $response")
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                isLoading = false,
-                                success = response,
-                                error = null
-                            )
+                        _uiState.update {
+                            it.copy(isLoading = false, success = response, error = null)
                         }
                     },
                     onFailure = { exception ->
                         Log.e("PetListingViewModel", "Pet listing failed", exception)
-                        _uiState.update { currentState ->
-                            currentState.copy(
+                        _uiState.update {
+                            it.copy(
                                 isLoading = false,
                                 error = exception.message ?: "Unknown error occurred",
                                 success = null
@@ -118,8 +117,8 @@ class PetListingViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e("PetListingViewModel", "Unexpected error during pet listing", e)
-                _uiState.update { currentState ->
-                    currentState.copy(
+                _uiState.update {
+                    it.copy(
                         isLoading = false,
                         error = e.message ?: "Unknown error occurred",
                         success = null

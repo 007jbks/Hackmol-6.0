@@ -1,6 +1,7 @@
 package com.example.pets.petlisting
 
 import android.Manifest
+import android.R
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -8,7 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -187,7 +188,7 @@ fun PetListingScreen(
                     )
                 } else {
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_gallery),
+                        painter = painterResource(id = R.drawable.ic_menu_gallery),
                         contentDescription = "No Photo",
                         tint = Color.Gray,
                         modifier = Modifier.size(64.dp)
@@ -237,7 +238,10 @@ fun PetListingScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        viewModel.createPetListing(getUserToken())
+                        viewModel.createPetListing(
+                            getUserToken(),
+                            context = context
+                        )
                     }
                 },
                 modifier = Modifier

@@ -2,19 +2,40 @@ package com.example.pets.navigation
 
 sealed class Screens (val route :String){
     object splashscreen:Screens("splashscreen")
-    object choosescreen:Screens("choosescreen")
+    object ngosignup:Screens("ngosignup")
+    object choose:Screens("choose")
+    object petrej1:Screens("petrej1")
+    object petrej2:Screens("petrej2")
+    object letssave:Screens("letssave")
+    object findpet:Screens("findpet")
+    object pawcontrol:Screens("pawcontrol")
+    object whyint:Screens("whyint")
     object rehome:Screens("rehome")
-    object pet:Screens("pet")
-    object abandoned:Screens("abandoned")
-    object screen6:Screens("screen6")
-    object screen7:Screens("screen7")
-    object screen8:Screens("screen8")
-    object signin:Screens(route = "signin")
-    object signup:Screens(route = "signup")
+    object urpic:Screens("urpic")
+    object pawmatch:Screens("pawmatch")
+    object pawcomp:Screens("pawcomp")
+    object pawmatched:Screens("pawmatched")
+    object topmatch:Screens("topmatch")
+    object petrej3:Screens("petrej3")
+    object rehomeani:Screens("rehomeani")
+    object tinder:Screens("tinder")
+    object totalmatch:Screens("totalmatch")
+    object anidetal:Screens("anidetal")
+    object detailani1:Screens("detailani1")
+    object detailani2:Screens("detailani2")
+    object preppaw:Screens("preppaw")
+    object pawcat:Screens("pawcat")
+    object preppawani:Screens("preppawani")
+    object anifeel:Screens("anifeel")
+    object anijournal:Screens("anijournal")
+    object postadoptcare:Screens("postadoptcare")
+    object chat:Screens("chat")
 
-
-
-
-
+    object ngodash:Screens("ngodash")
+    object update:Screens("update")
+    object em:Screens("em")
+    object petapprov:Screens("petapprov")
+    object petadd:Screens("petadd")
+    object ngouser:Screens("ngouser")
 
 }

@@ -79,11 +79,12 @@ fun PawControlScreen() {
         ) {
 
             Image(
-                painter = painterResource(R.drawable.dog), // replace with your drawable
+                painter = painterResource(R.drawable.dogy), // replace with your drawable
                 contentDescription = "Dog Peeking",
                 modifier = Modifier
-                    .height(120.dp)
+                    .size(400.dp)
                     .align(Alignment.CenterHorizontally)
+                    .padding(start=15.dp)
             )
         }
     }
@@ -140,7 +141,7 @@ fun PetAppScreen() {
             Spacer(modifier = Modifier.height(32.dp))
 
             PetButton(
-                text = "I HAVE FOUND AN ABANDONED PET",
+                text = "FOUND ABANDONED PET",
                 leftIcon = R.drawable.vector_11,
                 rightIcon = R.drawable.group_2198383,
                 showLeftIcon = true,

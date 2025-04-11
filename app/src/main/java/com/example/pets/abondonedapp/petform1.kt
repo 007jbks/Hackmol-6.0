@@ -28,12 +28,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.pets.R
+import com.example.pets.navigation.Screens
 import com.example.pets.onboarding.PetButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PetFormScreen() {
+fun PetFormScreen(navController: NavController) {
     var species by remember { mutableStateOf("") }
     var breed by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
@@ -163,7 +165,7 @@ fun PetFormScreen() {
 
             // Next button
             Button(
-                onClick = { /* Handle next button click */ },
+                onClick = { navController.navigate(Screens.petrej2.route) },
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .height(40.dp),
@@ -188,11 +190,7 @@ fun PetFormScreen() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PetFormPreview() {
-    PetFormScreen2()
-}
+
 
 @Composable
 fun ShadowedTextField(

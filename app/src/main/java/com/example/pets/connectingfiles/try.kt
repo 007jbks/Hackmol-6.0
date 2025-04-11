@@ -35,7 +35,7 @@ import com.example.pets.R
 
 
 @Composable
-fun LoginScreen(viewModel: AuthorisationViewModel,navController: NavController) {
+fun LoginScreenngo(viewModel: AuthorisationViewModel,navController: NavController) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     Column(
@@ -92,7 +92,7 @@ fun LoginScreen(viewModel: AuthorisationViewModel,navController: NavController) 
             shape = RoundedCornerShape(20.dp),
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(0.85f),
-            )
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -116,10 +116,10 @@ fun LoginScreen(viewModel: AuthorisationViewModel,navController: NavController) 
 }
 
 @Composable
-fun SignupScreen(viewModel: AuthorisationViewModel,navController: NavController) {
-    val email = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
-    val username = remember { mutableStateOf("") }
+fun SignupScreenngo(viewModel: AuthorisationViewModel,navController: NavController) {
+    val work_email_id= remember { mutableStateOf("") }
+    val create_password = remember { mutableStateOf("") }
+    val registration_Number = remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -156,8 +156,8 @@ fun SignupScreen(viewModel: AuthorisationViewModel,navController: NavController)
         Spacer(modifier = Modifier.height(26.dp))
 
         OutlinedTextField(
-            value = email.value,
-            onValueChange = { email.value = it },
+            value = work_email_id.value,
+            onValueChange = { work_email_id.value = it },
             label = { Text("Enter Email") },
             singleLine = true,
             shape = RoundedCornerShape(20.dp),
@@ -166,8 +166,8 @@ fun SignupScreen(viewModel: AuthorisationViewModel,navController: NavController)
 
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
-            value = username.value,
-            onValueChange = { password.value = it },
+            value = registration_Number.value,
+            onValueChange = { create_password.value = it },
             label = { Text("Enter Username") },
             singleLine = true,
             shape = RoundedCornerShape(20.dp),
@@ -178,8 +178,8 @@ fun SignupScreen(viewModel: AuthorisationViewModel,navController: NavController)
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
+            value = create_password.value,
+            onValueChange = { create_password.value = it },
             label = { Text("Enter Password") },
             singleLine = true,
             shape = RoundedCornerShape(20.dp),
@@ -190,7 +190,7 @@ fun SignupScreen(viewModel: AuthorisationViewModel,navController: NavController)
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { viewModel.signup(password= password.toString(),email= email.toString(), username = username.toString()) },
+            onClick = { viewModel.signup(password= create_password.toString(),email= work_email_id.toString(), username = registration_Number.toString()) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3366CC)),
             shape = RoundedCornerShape(15.dp),
             modifier = Modifier
@@ -201,9 +201,7 @@ fun SignupScreen(viewModel: AuthorisationViewModel,navController: NavController)
             Text("SIGN UP", fontWeight = FontWeight.Bold, color = Color.White)
         }
         Spacer(modifier = Modifier.height(10.dp))
-        Row {
-        Text("Already have an account ")
-            Text("  LOGIN" , modifier =   Modifier.clickable {  }, color = Color(0xFF3366CC))}
+
 
         Spacer(modifier = Modifier.height(70.dp))
     }
