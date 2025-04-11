@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -33,6 +34,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pets.R
+import com.example.pets.pawmatch.MatchesScreenPreview
+import com.example.pets.pawmatch.Profile1
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -45,21 +48,23 @@ data class Profile(
     val bio: String,
     val imageResId: Int
 )
-@Preview
+
 @Composable
-fun TinderApp() {
-    val navController = rememberNavController()
+fun TinderApp(navController: NavController) {
+    val navController2 = rememberNavController()
 
     MaterialTheme {
-        NavHost(navController = navController, startDestination = "main") {
+        NavHost(navController = navController2, startDestination = "main") {
             composable("main") {
-                TinderSwipeScreen(navController)
+                TinderSwipeScreen(navController2)
             }
             composable("disliked") {
-                DislikedScreen(navController)
+                Profile1(
+                    navController
+                )
             }
             composable("superlike") {
-                SuperLikeScreen(navController)
+                MatchesScreenPreview(navController2)
             }
         }
     }
@@ -598,7 +603,7 @@ fun ProfileCardContent(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
                             Color(0xCC000000)

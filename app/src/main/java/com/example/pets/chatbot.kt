@@ -17,14 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pets.connectingfiles.viewmodels.ChatBotViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 data class ChatMessage(
     val id: String,
@@ -35,17 +35,31 @@ data class ChatMessage(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ChatBotScreen() {
+fun ChatBotScreen(
+    viewModel: ChatBotViewModel = viewModel()
+) {
+    val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
     var userInput by remember { mutableStateOf("") }
-    val messages = remember { mutableStateListOf<ChatMessage>() }
     val lazyListState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val coroutineScope = rememberCoroutineScope()
 
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             lazyListState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
+    // Show error message if exists
+    errorMessage?.let { error ->
+        LaunchedEffect(error) {
+            // In a real app, you might want to show a snackbar or dialog here
+            // For now we'll just clear the error after a delay
+            kotlinx.coroutines.delay(3000)
+            viewModel.clearError()
         }
     }
 
@@ -74,17 +88,49 @@ fun ChatBotScreen() {
             )
         }
 
+        // Error message
+        errorMessage?.let {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Text(
+                    text = it,
+                    modifier = Modifier.padding(12.dp),
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
+
         // Messages list
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
-            state = lazyListState,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 8.dp)
+                .fillMaxWidth()
         ) {
-            items(messages, key = { it.id }) { message ->
-                ChatMessageBubble(message)
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(messages, key = { it.id }) { message ->
+                    ChatMessageBubble(message)
+                }
+            }
+
+            // Loading indicator
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                        .size(24.dp)
+                )
             }
         }
 
@@ -108,7 +154,9 @@ fun ChatBotScreen() {
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                 keyboardActions = KeyboardActions(
                     onSend = {
-                        sendMessage(userInput, messages, coroutineScope)
+                        viewModel.sendMessage(userInput)
+                        // Or use the offline version for testing:
+                        // viewModel.sendMessageOffline(userInput)
                         userInput = ""
                         keyboardController?.hide()
                     }
@@ -117,29 +165,38 @@ fun ChatBotScreen() {
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
+                ),
+                enabled = !isLoading
             )
 
             IconButton(
                 onClick = {
-                    sendMessage(userInput, messages, coroutineScope)
+                    viewModel.sendMessage(userInput)
+                    // Or use the offline version for testing:
+                    // viewModel.sendMessageOffline(userInput)
                     userInput = ""
                     keyboardController?.hide()
                 },
-                enabled = userInput.isNotBlank(),
+                enabled = userInput.isNotBlank() && !isLoading,
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(
-                        if (userInput.isNotBlank()) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceVariant
+                        when {
+                            isLoading -> MaterialTheme.colorScheme.surfaceVariant
+                            userInput.isNotBlank() -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        }
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.Send,
                     contentDescription = "Send message",
-                    tint = if (userInput.isNotBlank()) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = when {
+                        isLoading -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        userInput.isNotBlank() -> MaterialTheme.colorScheme.onPrimary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                 )
             }
         }
@@ -204,54 +261,20 @@ fun ChatMessageBubble(message: ChatMessage) {
     }
 }
 
-private fun sendMessage(
-    text: String,
-    messages: MutableList<ChatMessage>,
-    scope: CoroutineScope
-) {
-    if (text.isBlank()) return
-
-    val userMessage = ChatMessage(
-        id = "msg_${System.currentTimeMillis()}",
-        content = text,
-        isUser = true
-    )
-    messages.add(userMessage)
-
-    // Simulate bot response (replace with real API call)
-    scope.launch {
-        delay(800) // Simulate network delay
-
-        val botResponse = generateBotResponse(text)
-        val botMessage = ChatMessage(
-            id = "msg_${System.currentTimeMillis()}",
-            content = botResponse,
-            isUser = false
-        )
-        messages.add(botMessage)
-    }
-}
-
-private fun generateBotResponse(userInput: String): String {
-    val responses = listOf(
-        "I understand you're asking about \"$userInput\". Let me help with that.",
-        "Thanks for your message! Regarding \"$userInput\", here's what I know...",
-        "Interesting point about \"$userInput\". Here's some information that might help.",
-        "I've processed your request about \"$userInput\". Here's my response.",
-        "Let me think about \"$userInput\"... Here's what I can tell you."
-    )
-    return responses.random()
-}
-
 private fun formatTimestamp(timestamp: Long): String {
-    // Simple formatting - in a real app, use a proper date formatter
-    return "${(timestamp / 1000) % 60} sec ago"
+    val sdf = SimpleDateFormat("h:mm a", Locale.getDefault())
+    return sdf.format(Date(timestamp))
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun ChatBotScreenPreview() {
     MaterialTheme {
-        ChatBotScreen()
+        ChatBotScreen(
+            viewModel = ChatBotViewModel().apply {
+                // Add some test messages for preview
+                sendMessageOffline("Hello! How can you help me?")
+            }
+        )
     }
 }

@@ -45,7 +45,7 @@ import com.example.pets.R
 import com.example.pets.navigation.Screens
 import com.example.pets.onboarding.PetButton
 
-@Preview
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PetFormScreen2(navController: NavHostController) {
@@ -163,9 +163,9 @@ fun PetFormScreen2(navController: NavHostController) {
             Row{
                 // Approx. Age field
                 MultiOptionToggle(
-                    label = "VACCINATED?",
+                    label = "Visible injuries",
                     options = listOf("YES", "NO"),
-                    selectedOption = vaccinated,
+                    selectedOption = age,
                     onOptionSelected = { vaccinated = it },
                     modifier = Modifier.weight(1f)
                 )
@@ -195,7 +195,7 @@ fun PetFormScreen2(navController: NavHostController) {
             Row{
 
             MultiOptionToggle(
-                label = "WEARING COLOR?",
+                label = "Current Temperment ",
                 options = listOf("Friendly", "Scared ","Agrressive","Lethergic"),
                 selectedOption = wearingColor,
                 onOptionSelected = { wearingColor = it },
@@ -206,7 +206,7 @@ fun PetFormScreen2(navController: NavHostController) {
                 Spacer(Modifier.height(10.dp))
             Row{
             MultiOptionToggle(
-                label = "WEARING COLOR?",
+                label = "   APPROACHING HUMANS",
                 options = listOf("Easily", "Cautiously ","Avoiding"),
                 selectedOption = wearingColor,
                 onOptionSelected = { wearingColor = it },
@@ -215,7 +215,7 @@ fun PetFormScreen2(navController: NavHostController) {
             Spacer(Modifier.height(10.dp))
             Row{
             MultiOptionToggle(
-                label = "Making any concerning sound",
+                label = "MAKING ANY ONCERNING SOUND",
                 options = listOf("Yes","No"),
                 selectedOption = wearingColor,
                 onOptionSelected = { wearingColor = it },
@@ -228,7 +228,7 @@ fun PetFormScreen2(navController: NavHostController) {
 
             // Next button
             Button(
-                onClick = { navController.navigate(Screens.petrej2) },
+                onClick = { navController.navigate(Screens.whyint.route) },
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .height(40.dp),
@@ -238,7 +238,7 @@ fun PetFormScreen2(navController: NavHostController) {
                 shape = RoundedCornerShape(30.dp)
             ) {
                 Text(
-                    text = "NEXT",
+                    text = "Submit",
                     style = TextStyle(
                         color = Color.White,
                         fontSize = 18.sp,

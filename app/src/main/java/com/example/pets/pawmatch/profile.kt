@@ -35,12 +35,14 @@ import androidx.compose.ui.zIndex
 
 
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
 import com.example.pets.R
+import com.example.pets.navigation.Screens
 import com.example.pets.onboarding.PetButton
 
-@Preview
+
 @Composable
-fun Profile() {
+fun Profile1(navController: NavController) {
     ConstraintLayout(Modifier.background( Color(0xFFFFDDEA)
     )) {
         val (picture, pink,box,text ,button ) = createRefs()
@@ -54,7 +56,7 @@ fun Profile() {
             bottom.linkTo(parent.bottom, margin = 25.dp)}
         .zIndex(-1f)){
         Image(
-            painter = painterResource(R.drawable.ic_launcher_background),
+            painter = painterResource(R.drawable.crying_doggy),
             contentDescription = "profilepic",
             modifier = Modifier
                 .fillMaxWidth()  // Full width
@@ -158,7 +160,7 @@ fun Profile() {
                     )
                 }
             }
-        PetButton(text="I am ready to Adopt", onClick = {}, modifier = Modifier.constrainAs(button){
+        PetButton(text="I am ready to Adopt", onClick = {navController.navigate(Screens.chat.route)}, modifier = Modifier.constrainAs(button){
             centerHorizontallyTo(parent)
             centerVerticallyTo(parent,bias=0.85f)
         }.fillMaxWidth(0.5f).height(50.dp))

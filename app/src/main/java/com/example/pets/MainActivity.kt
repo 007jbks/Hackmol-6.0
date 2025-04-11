@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.pets.connectingfiles.AuthorisationViewModel
 import com.example.pets.connectingfiles.viewmodels.Interest
 import com.example.pets.connectingfiles.viewmodels.Interest1
+import com.example.pets.navigation.Navigation
 import com.example.pets.petlisting.PetListingScreen
 import com.example.pets.petlisting.PetListingViewModel
 
@@ -20,29 +21,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel1=ViewModelProvider(this)[Interest1::class.java]
 
-        // Initialize the ViewModels
-        viewModel = ViewModelProvider(this)[AuthorisationViewModel::class.java]
-        viewModelpet = ViewModelProvider(this)[PetListingViewModel::class.java]
-
-
-        // Call the signup function
-
-        viewModel1.searchPet(
-            species = "Dog",
-            breed = "Labrador",
-            gender = "Male",
-            weight_range = "1-10",
-            age_range = "1-3",
-            color_markings = "Golden"
-        )
         // Compose UI content
         setContent {
-            PetListingScreen(
-                viewModel = viewModelpet,
-                getUserToken = { token }
-            )
+
+            Navigation()
         }
     }
 }

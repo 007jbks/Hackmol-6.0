@@ -44,7 +44,7 @@ fun SplashScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         delay(2000) // 2 seconds delay
-        navController.navigate(Screens.whyint.route) {
+        navController.navigate(Screens.choose.route) {
             popUpTo(Screens.splashscreen.route) { // Optional: remove splash from back stack
                 inclusive = true
             }

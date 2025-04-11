@@ -4,6 +4,7 @@ package com.example.pets.pawmatch
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 
 // 🌟 Your data class
@@ -45,7 +47,7 @@ data class PawMatch(
 )
 
 @Composable
-fun matchesScreen(pawMatches: List<PawMatch>) {
+fun matchesScreen(pawMatches: List<PawMatch>,navController: NavController) {
     Box(Modifier.fillMaxSize().background(Color(0xFFFFDDEA))) {
 
     }
@@ -89,18 +91,18 @@ fun matchesScreen(pawMatches: List<PawMatch>) {
             modifier = Modifier.fillMaxSize()
         ) {
             items(pawMatches) { pawMatch ->
-                PawMatchItem(pawMatch = pawMatch)
+                PawMatchItem(pawMatch = pawMatch, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun PawMatchItem(pawMatch: PawMatch) {
+fun PawMatchItem(pawMatch: PawMatch,navController: NavController) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth().clickable {  },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -229,9 +231,9 @@ fun SearchBar(
     }
 }
 
-@Preview
+
 @Composable
-fun MatchesScreenPreview() {
+fun MatchesScreenPreview(navController: NavController) {
     val samplePawMatches = listOf(
         PawMatch(
             name = "Buddy",
@@ -258,6 +260,6 @@ fun MatchesScreenPreview() {
     )
 
     MaterialTheme {
-        matchesScreen(pawMatches = samplePawMatches)
+        matchesScreen(pawMatches = samplePawMatches, navController = navController)
     }
 }

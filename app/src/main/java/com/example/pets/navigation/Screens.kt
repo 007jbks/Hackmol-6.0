@@ -3,6 +3,7 @@ package com.example.pets.navigation
 sealed class Screens (val route :String){
     object splashscreen:Screens("splashscreen")
     object ngosignup:Screens("ngosignup")
+    object login :Screens("login")
     object choose:Screens("choose")
     object petrej1:Screens("petrej1")
     object petrej2:Screens("petrej2")

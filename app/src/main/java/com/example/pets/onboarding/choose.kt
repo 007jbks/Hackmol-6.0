@@ -45,11 +45,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import com.example.pets.R
+import com.example.pets.navigation.Screens
 
-@Preview
+
 @Composable
-fun PawControlScreen() {
+fun PawControlScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,7 +72,7 @@ fun PawControlScreen() {
                 modifier = Modifier.padding(top = 40.dp,bottom = 27.dp)
             )
 
-            PetAppScreen()
+            PetAppScreen(navController)
         }
 
         Column(
@@ -109,7 +111,7 @@ fun PawButton(text: String, icon: ImageVector) {
 
 
 @Composable
-fun PetAppScreen() {
+fun PetAppScreen(navController: NavController) {
     Box(
         modifier = Modifier
 
@@ -135,7 +137,7 @@ fun PetAppScreen() {
                 text = "I AM LOOKING FOR A PET",
                 rightIcon = R.drawable.vector_10,
                 showRightIcon = true,
-                        onClick = {}
+                        onClick = {navController.navigate(Screens.urpic.route)}
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -146,7 +148,7 @@ fun PetAppScreen() {
                 rightIcon = R.drawable.group_2198383,
                 showLeftIcon = true,
                 showRightIcon = true,
-                onClick = {}
+                onClick = {navController.navigate(Screens.petrej1.route)}
             )
         }
     }

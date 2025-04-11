@@ -1,4 +1,4 @@
-package com.example.pets.onboarding
+package com.example.pets.ngo
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,16 +19,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pets.R
 import com.example.pets.navigation.Screens
-
+import com.example.pets.onboarding.PetAppScreen
+import com.example.pets.onboarding.PetButton
 
 @Composable
-fun StartingScreen(navController: NavController) {
+fun PawControlScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,9 +40,8 @@ fun StartingScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(15.dp))
             Text(
-                text = "Welcome to Pawcontrol",
+                text = "What brings you to Paw\n Control today?",
                 color = Color(0xFF3366CC),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -50,7 +49,7 @@ fun StartingScreen(navController: NavController) {
                 modifier = Modifier.padding(top = 40.dp,bottom = 27.dp)
             )
 
-            PetAppScreen2(navController)
+            PetAppScreen3(navController)
         }
 
         Column(
@@ -69,14 +68,14 @@ fun StartingScreen(navController: NavController) {
         }
     }
 }
+
 @Composable
-fun PetAppScreen2(navController: NavController) {
+fun PetAppScreen3(navController: NavController) {
     Box(
         modifier = Modifier
 
 
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,26 +83,32 @@ fun PetAppScreen2(navController: NavController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            PetButton(
+                text = "UPDATES OF ADOPTED PET",
+                leftIcon = R.drawable.group_2198383,
+                showLeftIcon = true,
+                onClick = {}
+            )
+
             Spacer(modifier = Modifier.height(32.dp))
 
             PetButton(
-                text = "NGO OR SHELTER",
+                text = "ABANDONED PETS IN NEED",
                 rightIcon = R.drawable.vector_10,
                 showRightIcon = true,
-                onClick = {navController.navigate(Screens.ngosignup.route)}
+                onClick = {}
             )
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             PetButton(
-                text = "ADOPT OR REHOME",
+                text = "ADOPTION IN PROGRESS",
                 leftIcon = R.drawable.vector_11,
                 rightIcon = R.drawable.group_2198383,
                 showLeftIcon = true,
                 showRightIcon = true,
-                onClick = {navController.navigate(Screens.pawcontrol.route)}
+                onClick = {navController.navigate(Screens.petrej1.route)}
             )
         }
     }
 }
-
