@@ -27,8 +27,8 @@ import logging
 
 
 def send_email(to_email, subject, body):
-    sender_email = "jon00doe00297@gmail.com"
-    sender_password = "bdaykyslqvzdulsn"  # Use an App Password, not your regular password!
+    sender_email = Sender_address
+    sender_password = sender_pass # Use an App Password, not your regular password!
 
     msg = MIMEMultipart()
     msg["From"] = sender_email
@@ -59,9 +59,9 @@ smtplib.SMTP.debuglevel = 1  # Add this at the top of your file
 
 # Configuration       
 cloudinary.config( 
-    cloud_name = "dhc8pzsgc", 
-    api_key = "329559697711525", 
-    api_secret = "deemYEvqxgWItqd9CZIbQIm7WPo", 
+    cloud_name = cloud_name_here, 
+    api_key = api_key_here, 
+    api_secret = secret_api_key_here, 
     secure=True
 )
 #################################################################
